@@ -1,0 +1,82 @@
+name: testing
+
+on:
+  pull_request:
+    branches:
+      - main
+    workflow_dispatch:
+
+jobs:
+  build-and-deploy-qa:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Build and Push Backend Docker Image for QA
+      working-directory: ./backend
+      run: |
+        docker build -t docker.io/ass3-backend-image:qa .
+        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        docker push docker.io/ass3-backend-image:qa
+
+    - name: Build and Push Frontend Docker Image for QA
+      working-directory: ./frontend
+      run: |
+        docker build -t docker.io/ass3-frontend-image:qa .
+        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        docker push docker.io/ass3-frontend-image:qa
+
+    - name: Deploy to AWS QA Server
+      run: |
+        uses: burnett01/rsync-deployments@6.0.0
+        with:
+          switches: -avzr --delete
+          path: ./*
+          remote_path: ~/
+          remote_host: 3.111.219.32
+          remote_user: ubuntu
+          remote_key: ${{ secrets.AWS_Key }}
+
+
+      - name: docker compose
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: 3.111.219.32
+          username: ubuntu
+          key: ${{ secrets.AWS_Key }}
+          port: 22
+          script: |
+            cd assignment3
+            docker-compose up
+
+      # notifying the QA and the Developer on workflow sucess.
+      - name: Notify on success
+        if: success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          username: ${{secrets.MAIL_USERNAME}}
+          password: ${{secrets.MAIL_PASSWORD}}
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          subject: Github Action Sucess
+          to: ammarah5683@gmail.com
+          from: ammarah5683@gmail.com
+          body: Workflow of ${{github.repository}} initiated by ${{github.actor}} was sucessfully executed. View the changes on the server http://3.111.219.32/
+
+      # notifying the QA and the Developer on workflow sucess.
+      - name: Notify on Failure
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          username: ${{secrets.MAIL_USERNAME}}
+          password: ${{secrets.MAIL_PASSWORD}}
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          subject: Github Action Failure
+          to: ammarah5683@gmail.com
+          from: ammarah5683@gmail.com
+          body: Workflow of ${{github.repository}} initiated by ${{github.actor}} failed, kindly check the workflow logs!
