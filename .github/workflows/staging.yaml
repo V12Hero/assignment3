@@ -32,7 +32,6 @@ jobs:
         key: ${{ secrets.AWS_Key }}
         port: 22
         script: |
-          cd assignment3
           docker-compose up
 
       # notifying the QA and the Developer on workflow sucess.
