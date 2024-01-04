@@ -1,4 +1,4 @@
-name: testing
+name: Testing Workflow
 
 on:
   pull_request:
@@ -27,8 +27,8 @@ jobs:
         docker build -t docker.io/ass3-frontend-image:qa .
         docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
         docker push docker.io/ass3-frontend-image:qa
-
-    - name: Deploy to AWS QA Server
+     
+    - name: Deploy to AWS QA Server 
       uses: burnett01/rsync-deployments@6.0.0
       with:
         switches: -avzr --delete
@@ -44,7 +44,7 @@ jobs:
       with:
         host: 3.111.219.32
         username: ubuntu
-        key: ${{ secrets.AWS_Key }}
+        key: ${{ secrets.SSH_KEY }}
         port: 22
         script: |
           cd assignment3
@@ -65,7 +65,7 @@ jobs:
         from: ammarah5683@gmail.com
         body: Workflow of ${{github.repository}} initiated by ${{github.actor}} was sucessfully executed. View the changes on the server http://3.111.219.32/
 
-     # notifying the QA and the Developer on workflow sucess.
+# notifying the QA and the Developer on workflow sucess.
     - name: Notify on Failure
       if: failure()
       uses: dawidd6/action-send-mail@v3
