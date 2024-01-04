@@ -29,7 +29,6 @@ jobs:
         docker push docker.io/ass3-frontend-image:qa
 
     - name: Deploy to AWS QA Server
-      run: |
       uses: burnett01/rsync-deployments@6.0.0
       with:
         switches: -avzr --delete
