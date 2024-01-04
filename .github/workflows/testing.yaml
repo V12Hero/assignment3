@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - main
-    workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
   build-and-deploy-qa:
@@ -31,13 +31,13 @@ jobs:
     - name: Deploy to AWS QA Server
       run: |
       uses: burnett01/rsync-deployments@6.0.0
-        with:
-          switches: -avzr --delete
-          path: ./*
-          remote_path: ~/
-          remote_host: 3.111.219.32
-          remote_user: ubuntu
-          remote_key: ${{ secrets.AWS_Key }}
+      with:
+        switches: -avzr --delete
+        path: ./*
+        remote_path: ~/
+        remote_host: 3.111.219.32
+        remote_user: ubuntu
+        remote_key: ${{ secrets.AWS_Key }}
 
 
     - name: docker compose
