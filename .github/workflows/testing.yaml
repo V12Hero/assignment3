@@ -13,20 +13,6 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
-
-    - name: Build and Push Backend Docker Image for QA
-      working-directory: ./backend
-      run: |
-        docker build -t docker.io/ass3-backend-image:qa .
-        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-        docker push docker.io/ass3-backend-image:qa
-
-    - name: Build and Push Frontend Docker Image for QA
-      working-directory: ./frontend
-      run: |
-        docker build -t docker.io/ass3-frontend-image:qa .
-        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-        docker push docker.io/ass3-frontend-image:qa
      
     - name: Deploy to AWS QA Server 
       uses: burnett01/rsync-deployments@6.0.0
@@ -44,11 +30,10 @@ jobs:
       with:
         host: 3.111.219.32
         username: ubuntu
-        key: ${{ secrets.SSH_KEY }}
+        key: ${{ secrets.AWS_Key }}
         port: 22
         script: |
-          cd assignment3
-          docker-compose up
+           sudo docker-compose up
 
       # notifying the QA and the Developer on workflow sucess.
     - name: Notify on success
